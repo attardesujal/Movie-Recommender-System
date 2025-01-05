@@ -2,7 +2,6 @@ import streamlit as st
 import pickle as pk
 import pandas as pd
 import requests
-import patoolib
 import os
 
 def fetch_poster(movie_id):
@@ -42,13 +41,16 @@ def recommend(movie):
         print(f"An error occurred: {e}")
         return [], []
 
-# Decompress the 7z file for similarity matrix
-if not os.path.exists('similarity.pkl'):
-    patoolib.extract_archive('similarity.pkl.7z', outdir='.')
+# Reassemble the chunks into the full similarity matrix
+similarity = []
+num_parts = 10  # Adjust this based on the number of chunks you created
+for i in range(num_parts):
+    with open(f'similarity_chunk_{i}.pkl', 'rb') as f:
+        chunk = pk.load(f)
+        similarity.extend(chunk)
 
 # Load the dictionary from the pickle file
 movies_dict = pk.load(open('movies_dict.pkl', 'rb'))
-similarity = pk.load(open('similarity.pkl', 'rb'))
 
 # Convert the dictionary to a DataFrame
 movies = pd.DataFrame(movies_dict)
