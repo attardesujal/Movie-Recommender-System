@@ -1,4 +1,4 @@
-﻿altair==5.5.0
+altair==5.5.0
 anyio==4.7.0
 argon2-cffi==23.1.0
 argon2-cffi-bindings==21.2.0
@@ -22,6 +22,8 @@ cycler==0.12.1
 debugpy==1.8.11
 decorator==5.1.1
 defusedxml==0.7.1
+EasyProcess==1.1
+entrypoint2==1.1
 executing==2.1.0
 fastjsonschema==2.21.1
 fonttools==4.55.3
@@ -72,6 +74,7 @@ packaging==24.2
 pandas==2.2.3
 pandocfilters==1.5.1
 parso==0.8.4
+patool==3.1.0
 pillow==11.0.0
 platformdirs==4.3.6
 prometheus_client==0.21.1
@@ -87,6 +90,7 @@ pyparsing==3.2.1
 python-dateutil==2.9.0.post0
 python-json-logger==3.2.1
 pytz==2024.2
+pyunpack==0.3
 pywin32==308
 pywinpty==2.0.14
 PyYAML==6.0.2
@@ -128,7 +132,3 @@ wcwidth==0.2.13
 webcolors==24.11.1
 webencodings==0.5.1
 websocket-client==1.8.0
-streamlit
-requests
-pandas
-patool
