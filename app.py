@@ -2,6 +2,8 @@ import streamlit as st
 import pickle as pk
 import pandas as pd
 import requests
+from pyunpack import Archive
+import os
 
 def fetch_poster(movie_id):
     response = requests.get(f'http://api.themoviedb.org/3/movie/{movie_id}?api_key=8265bd1679663a7ea12ac168da84d2e8&language=en-US')
@@ -15,20 +17,31 @@ def fetch_poster(movie_id):
         return None
 
 def recommend(movie):
-    movie_index = movies[movies['title'] == movie].index[0]
-    distance = similarity[movie_index]
-    movie_list = sorted(list(enumerate(distance)), reverse=True, key=lambda x: x[1])[1:6]
+    try:
+        movie_index = movies[movies['title'] == movie].index[0]
+        distances = similarity[movie_index]
+        movie_list = sorted(list(enumerate(distances)), reverse=True, key=lambda x: x[1])[1:6]
 
-    recommended_movies = []
-    recommended_movies_posters = []
-    for i in movie_list:
-        movie_id = movies.iloc[i[0]].movie_id
-        # Fetch poster from API
-        poster = fetch_poster(movie_id)
-        if poster:
-            recommended_movies.append(movies.iloc[i[0]].title)
-            recommended_movies_posters.append(poster)
-    return recommended_movies, recommended_movies_posters
+        recommended_movies = []
+        recommended_movies_posters = []
+        for i in movie_list:
+            movie_id = movies.iloc[i[0]].movie_id
+            poster = fetch_poster(movie_id)
+            if poster:
+                recommended_movies.append(movies.iloc[i[0]].title)
+                recommended_movies_posters.append(poster)
+        return recommended_movies, recommended_movies_posters
+
+    except IndexError as e:
+        print(f"Movie not found in database: {e}")
+        return [], []
+    except Exception as e:
+        print(f"An error occurred: {e}")
+        return [], []
+
+# Decompress the 7z file for similarity matrix
+if not os.path.exists('similarity.pkl'):
+    Archive('similarity.pkl.7z').extractall('.')
 
 # Load the dictionary from the pickle file
 movies_dict = pk.load(open('movies_dict.pkl', 'rb'))
@@ -38,15 +51,14 @@ similarity = pk.load(open('similarity.pkl', 'rb'))
 movies = pd.DataFrame(movies_dict)
 
 # Set the title of the Streamlit app
-st.title('Movie Recommender')
+st.title('Movie Recommender System')
 
 # Create a select box for movie selection
 selected_movie_name = st.selectbox(
     'Choose a movie:',
     movies['title'].values)
 
-# Display the selected movie
-st.write('You selected:', selected_movie_name)
+# Add a button to get recommendations
 if st.button('Recommend'):
     names, posters = recommend(selected_movie_name)
     if names and posters:
