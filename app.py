@@ -2,7 +2,7 @@ import streamlit as st
 import pickle as pk
 import pandas as pd
 import requests
-from pyunpack import Archive
+import patoolib
 import os
 
 def fetch_poster(movie_id):
@@ -12,8 +12,8 @@ def fetch_poster(movie_id):
         poster_path = data['poster_path']
         full_path = f'https://image.tmdb.org/t/p/w500/{poster_path}'
         return full_path
-    except ValueError as e:
-        print(f"Error decoding JSON: {e}")
+    except (ValueError, KeyError) as e:
+        print(f"Error fetching poster: {e}")
         return None
 
 def recommend(movie):
@@ -27,9 +27,12 @@ def recommend(movie):
         for i in movie_list:
             movie_id = movies.iloc[i[0]].movie_id
             poster = fetch_poster(movie_id)
+            recommended_movies.append(movies.iloc[i[0]].title)
             if poster:
-                recommended_movies.append(movies.iloc[i[0]].title)
                 recommended_movies_posters.append(poster)
+            else:
+                recommended_movies_posters.append("https://via.placeholder.com/500x750?text=No+Poster+Available")
+
         return recommended_movies, recommended_movies_posters
 
     except IndexError as e:
@@ -41,7 +44,7 @@ def recommend(movie):
 
 # Decompress the 7z file for similarity matrix
 if not os.path.exists('similarity.pkl'):
-    Archive('similarity.pkl.7z').extractall('.')
+    patoolib.extract_archive('similarity.pkl.7z', outdir='.')
 
 # Load the dictionary from the pickle file
 movies_dict = pk.load(open('movies_dict.pkl', 'rb'))
